@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build only",
+            "type": "process",
+            "command": "sampctl",
+            "args": ["package", "build"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "instanceLimit": 1,
+                "reevaluateOnRerun": true
+            },
+            "isBackground": false,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": true,
+                "revealProblems": "always",
+                "focus": false
+            },
+            "problemMatcher": "$sampctl"
+        },
+        {
+            "label": "build watcher",
+            "type": "process",
+            "command": "sampctl",
+            "args": ["package", "build"],
+            "group": "build",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "problemMatcher": "$sampctl"
+        },
+        {
+            "label": "run tests",
+            "type": "shell",
+            "command": "sampctl package run",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "problemMatcher": "$sampctl"
+        },
+        {
+            "label": "run tests watcher",
+            "type": "shell",
+            "command": "sampctl package run --watch",
+            "group": "test",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            },
+            "problemMatcher": "$sampctl"
+        }
+    ]
+}
