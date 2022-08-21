@@ -3,7 +3,6 @@ package runner
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	sampquery "github.com/Southclaws/go-samp-query"
@@ -49,16 +48,16 @@ func runDiscord(ctx context.Context, ps *pubsub.PubSub, cfg Config) {
 		panic(err)
 	}
 
-	discord.ChannelMessageSend(cfg.DiscordChannelInfo, "Scavenge and Survive server starting!") //nolint:errcheck
+	discord.ChannelMessageSend(cfg.DiscordChannel, "Scavenge and Survive server starting!") //nolint:errcheck
 
 	discord.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		switch m.Message.Content {
 		case "/status":
 			server, err := sampquery.GetServerInfo(ctx, "play.scavengesurvive.com:7777", false)
 			if err != nil {
-				discord.ChannelMessageSend(cfg.DiscordChannelInfo, "Failed to query :("+err.Error()) //nolint:errcheck
+				discord.ChannelMessageSend(cfg.DiscordChannel, "Failed to query :("+err.Error()) //nolint:errcheck
 			} else {
-				discord.ChannelMessageSendEmbed(cfg.DiscordChannelInfo, &discordgo.MessageEmbed{ //nolint:errcheck
+				discord.ChannelMessageSendEmbed(cfg.DiscordChannel, &discordgo.MessageEmbed{ //nolint:errcheck
 					Title: "Server Status",
 					Type:  discordgo.EmbedTypeRich,
 					Description: fmt.Sprintf(
@@ -73,81 +72,15 @@ func runDiscord(ctx context.Context, ps *pubsub.PubSub, cfg Config) {
 		}
 	})
 
-	go func() {
-		if err := discord.Open(); err != nil {
-			panic(err)
+	for range ps.Sub("server_restart") {
+		if _, err := discord.ChannelMessageSend(cfg.DiscordChannel, "Server restart!"); err != nil {
+			zap.L().Error("failed to send discord message", zap.Error(err))
 		}
-	}()
+	}
 
-	// these must be pre-created in order to prevent messages being missed
-	// during initialisation.
-	errorsBacktrace := ps.Sub("errors.backtrace")
-	infoRestart := ps.Sub("info.restart")
-	infoUpdate := ps.Sub("info.update")
-	errorsSingle := ps.Sub("errors.single")
-
-	for {
-		select {
-		case <-infoRestart:
-			// if _, err := discord.ChannelMessageSend(cfg.DiscordChannelInfo, "Server restart!"); err != nil {
-			// 	zap.L().Error("failed to send discord message", zap.Error(err))
-			// }
-
-		case d := <-infoUpdate:
-			if _, err := discord.ChannelMessageSend(cfg.DiscordChannelInfo, fmt.Sprintf("A server update is on the way in %s", d.(time.Duration))); err != nil {
-				zap.L().Error("failed to send discord message", zap.Error(err))
-			}
-
-		case obj := <-errorsSingle:
-			data, ok := obj.(map[string]string)
-			if !ok {
-				zap.L().Error("failed to get error fields", zap.Any("obj", obj))
-			}
-
-			title, ok := data[sampLoggerMessageKey]
-			if !ok {
-				title = "Error"
-			}
-
-			fields := []*discordgo.MessageEmbedField{}
-			for k, v := range data {
-				if k == sampLoggerMessageKey {
-					continue
-				}
-				fields = append(fields, &discordgo.MessageEmbedField{
-					Name:  k,
-					Value: v,
-				})
-			}
-
-			if _, err := discord.ChannelMessageSendEmbed(cfg.DiscordChannelErrors, &discordgo.MessageEmbed{
-				Type:   discordgo.EmbedTypeRich,
-				Title:  title,
-				Fields: fields,
-				Color:  0xFF0000,
-			}); err != nil {
-				zap.L().Error("failed to send discord message", zap.Error(err))
-			}
-		case obj := <-errorsBacktrace:
-			message, ok := obj.(string)
-			if !ok {
-				zap.L().Error("failed to get error fields", zap.Any("obj", obj))
-			}
-
-			// filter out dialogue responses as they contain raw passwords
-			lines := strings.Split(message, "\n")
-			n := 0
-			for _, line := range lines {
-				if !strings.Contains(line, "OnDialogResponse") {
-					lines[n] = line
-					n++
-				}
-			}
-			lines = lines[:n]
-
-			if _, err := discord.ChannelMessageSend(cfg.DiscordChannelErrors, fmt.Sprintf("Error backtrace:\n```\n%s\n```", strings.Join(lines, "\n"))); err != nil {
-				zap.L().Error("failed to send discord message", zap.Error(err))
-			}
+	for d := range ps.Sub("server_update") {
+		if _, err := discord.ChannelMessageSend(cfg.DiscordChannel, fmt.Sprintf("A server update is on the way in %s", d.(time.Duration))); err != nil {
+			zap.L().Error("failed to send discord message", zap.Error(err))
 		}
 	}
 }

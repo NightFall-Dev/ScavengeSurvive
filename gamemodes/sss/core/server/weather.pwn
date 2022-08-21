@@ -68,7 +68,7 @@ hook OnGameModeInit()
 {
 	// Todo: custom weather array loaded from settings
 
-	weather_Current = random(19);
+	weather_Current = random(sizeof(WeatherData));
 	weather_LastChange = GetTickCount();
 }
 
@@ -78,16 +78,6 @@ hook OnPlayerConnect(playerid)
 	weather_PlayerHour[playerid] = -1;
 	weather_PlayerMinute[playerid] = -1;
 	_WeatherUpdateForPlayer(playerid);
-}
-
-hook OnPlayerSpawnChar(playerid)
-{
-	SetWeatherForPlayer(playerid, weather_Current);
-}
-
-hook OnPlayerSpawnNewChar(playerid)
-{
-	SetWeatherForPlayer(playerid, weather_Current);
 }
 
 task WeatherUpdate[600000]()
@@ -106,7 +96,6 @@ task WeatherUpdate[600000]()
 
 		weather_Current = list[random(idx)];
 		weather_LastChange = GetTickCount();
-		_WeatherUpdate();
 	}
 
 }

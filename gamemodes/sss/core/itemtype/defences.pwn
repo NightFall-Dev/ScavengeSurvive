@@ -81,10 +81,6 @@ forward OnPlayerInteractDefence(playerid, Item:itemid);
 
 ==============================================================================*/
 
-public OnPlayerShootDynamicObject(playerid, weaponid, STREAMER_TAG_OBJECT:objectid, Float:x, Float:y, Float:z)
-{
-	return 1;
-}
 
 hook OnPlayerConnect(playerid)
 {
@@ -235,8 +231,7 @@ hook OnPlayerUseItemWithItem(playerid, Item:itemid, Item:withitemid)
 		GetItemArrayDataAtCell(withitemid, active, def_active);
 		if(active)
 		{
-			if(!_InteractDefenceWithItem(playerid, withitemid, itemid))
-				_InteractDefence(playerid, withitemid);
+			_InteractDefenceWithItem(playerid, withitemid, itemid);
 		}
 		else
 		{
@@ -783,7 +778,6 @@ hook OnItemTweakFinish(playerid, Item:itemid)
 	{
 		DestroyDynamicObject(def_TweakArrow[playerid]);
 		def_TweakArrow[playerid] = INVALID_OBJECT_ID;
-		CallLocalFunction("OnDefenceModified", "d", _:itemid);
 	}
 }
 
@@ -991,10 +985,8 @@ hook OnItemHitPointsUpdate(Item:itemid, oldvalue, newvalue)
 {
 	new ItemType:itemtype = GetItemType(itemid);
 
-	if(def_ItemTypeDefenceType[itemtype] != -1){
+	if(def_ItemTypeDefenceType[itemtype] != -1)
 		SetItemLabel(itemid, sprintf("%d/%d", GetItemHitPoints(itemid), GetItemTypeMaxHitPoints(itemtype)));
-		CallLocalFunction("OnDefenceModified", "d", _:itemid);
-	}
 }
 
 hook OnItemDestroy(Item:itemid)

@@ -100,7 +100,7 @@ stock GetPlayerMuteDuration(playerid)
 
 stock GetPlayerMuteRemainder(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	if(!mute_Muted[playerid])

@@ -6,10 +6,9 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"github.com/Southclaws/sampctl/download"
-	"github.com/Southclaws/sampctl/rook"
+	"github.com/Southclaws/sampctl/pkgcontext"
 	"github.com/cskr/pubsub"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
@@ -38,7 +37,7 @@ func Run(cfg Config) error {
 
 	gh := github.NewClient(nil)
 
-	pcx, err := rook.NewPackageContext(gh, nil, true, dir, runtime.GOOS, cacheDir, "")
+	pcx, err := pkgcontext.NewPackageContext(gh, nil, true, dir, runtime.GOOS, cacheDir, "")
 	if err != nil {
 		return errors.Wrap(err, "failed to interpret directory as Pawn package")
 	}
@@ -73,15 +72,12 @@ func Run(cfg Config) error {
 		go RunWatcher(ctx, pcx)
 	}
 
+	go RunServer(ctx, ps, os.Stdin, os.Stdout, false)
 	go RunAPI(ctx, ps, cfg.Restart)
+
 	if cfg.DiscordToken != "" {
 		go RunDiscord(ctx, ps, cfg)
 	}
-
-	time.Sleep(time.Second)
-
-	parser := ReactiveParser{ps}
-	go RunServer(ctx, ps, os.Stdin, parser.GetWriter(), false)
 
 	zap.L().Info("awaiting signals, cancellations or fatal errors")
 

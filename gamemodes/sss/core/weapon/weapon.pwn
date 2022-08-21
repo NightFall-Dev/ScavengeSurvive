@@ -16,7 +16,7 @@
 #include <YSI_Coding\y_hooks>
 
 
-#define MAX_ITEM_WEAPON	(65)
+#define MAX_ITEM_WEAPON	(64)
 
 
 enum (<<= 1)
@@ -74,16 +74,17 @@ forward ItemType:GetItemWeaponItemAmmoItem(Item:itemid);
 
 hook OnPlayerConnect(playerid)
 {
-	WeaponAmmoUI[playerid]			=CreatePlayerTextDraw(playerid, 520.411254, 62.649990, "500/500");
+	WeaponAmmoUI[playerid]			=CreatePlayerTextDraw(playerid, 520.000000, 64.000000, "500/500");
 	PlayerTextDrawAlignment			(playerid, WeaponAmmoUI[playerid], 2);
 	PlayerTextDrawBackgroundColor	(playerid, WeaponAmmoUI[playerid], 255);
 	PlayerTextDrawFont				(playerid, WeaponAmmoUI[playerid], 1);
-	PlayerTextDrawLetterSize		(playerid, WeaponAmmoUI[playerid], 0.278114, 1.372495);
+	PlayerTextDrawLetterSize		(playerid, WeaponAmmoUI[playerid], 0.210000, 1.000000);
 	PlayerTextDrawColor				(playerid, WeaponAmmoUI[playerid], -1);
-	PlayerTextDrawSetShadow(playerid, WeaponAmmoUI[playerid], 0);
 	PlayerTextDrawSetOutline		(playerid, WeaponAmmoUI[playerid], 1);
 	PlayerTextDrawSetProportional	(playerid, WeaponAmmoUI[playerid], 1);
-	PlayerTextDrawTextSize			(playerid, WeaponAmmoUI[playerid], 1613.000000, -118.533325);
+	PlayerTextDrawUseBox			(playerid, WeaponAmmoUI[playerid], 1);
+	PlayerTextDrawBoxColor			(playerid, WeaponAmmoUI[playerid], 255);
+	PlayerTextDrawTextSize			(playerid, WeaponAmmoUI[playerid], 548.000000, 40.000000);
 
 	itmw_DropItemID[playerid] = INVALID_ITEM_ID;
 }
@@ -1017,10 +1018,8 @@ stock GetItemTypeWeaponFlags(ItemType:itemtype)
 stock GetItemWeaponItemMagAmmo(Item:itemid)
 {
 	dbg("weapon-core", 3, "GetItemWeaponItemMagAmmo itemid:%d", _:itemid);
-	new ret, Error:e;
-	e = GetItemArrayDataAtCell(itemid, ret, WEAPON_ITEM_ARRAY_CELL_MAG);
-	if(IsError(e))
-		return Handled();
+	new ret;
+	GetItemArrayDataAtCell(itemid, ret, WEAPON_ITEM_ARRAY_CELL_MAG);
 	return ret < 0 ? 0 : ret;
 }
 

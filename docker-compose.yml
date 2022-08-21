@@ -8,8 +8,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       AUTO_BUILD: "true" # auto build on source code changes
       DISCORD_TOKEN: ${DISCORD_TOKEN}
-      DISCORD_CHANNEL_INFO: ${DISCORD_CHANNEL_INFO}
-      DISCORD_CHANNEL_ERRORS: ${DISCORD_CHANNEL_ERRORS}
+      DISCORD_CHANNEL: ${DISCORD_CHANNEL}
       SETTINGS_OVERRIDE: |
         autosave/autosave-interval=60000
         autosave/autosave-toggle=1
@@ -22,9 +21,9 @@ services:
         player/combat-log-window=30
         player/interior-entry=0
         player/login-freeze-time=8
-        player/max-tab-out-time=3600
+        player/max-tab-out-time=60
         player/nametag-distance=3
-        player/ping-limit=900
+        player/ping-limit=400
         player/player-animations=1
         player/vehicle-surfing=0
         server/crash-on-exit=0

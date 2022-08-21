@@ -13,7 +13,7 @@
 ==============================================================================*/
 
 
-#define MAX_MOVEMENT_RANGE	(1.5)
+#define MAX_MOVEMENT_RANGE	(1.0)
 #define NO_GO_ZONE_SIZE		(2.2)
 #define TWK_AREA_IDENTIFIER	(1234)
 
@@ -211,32 +211,32 @@ hook OnPlayerClickPlayerTD(playerid, PlayerText:playertextid)
 	{
 		if(playertextid == twk_MoveF[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.05, 0.0, 0.0);
+			_twk_AdjustItemPos(playerid, 0.1, 0.0, 0.0);
 		}
 
 		if(playertextid == twk_MoveB[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.05, 180.0, 0.0);
+			_twk_AdjustItemPos(playerid, 0.1, 180.0, 0.0);
 		}
 
 		if(playertextid == twk_MoveL[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.05, 90.0, 0.0);
+			_twk_AdjustItemPos(playerid, 0.1, 90.0, 0.0);
 		}
 
 		if(playertextid == twk_MoveR[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.05, -90.0, 0.0);
+			_twk_AdjustItemPos(playerid, 0.1, -90.0, 0.0);
 		}
 
 		if(playertextid == twk_RotR[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.0, 0.0, -2.0);
+			_twk_AdjustItemPos(playerid, 0.0, 0.0, -5.0);
 		}
 
 		if(playertextid == twk_RotL[playerid])
 		{
-			_twk_AdjustItemPos(playerid, 0.0, 0.0, 2.0);
+			_twk_AdjustItemPos(playerid, 0.0, 0.0, 5.0);
 		}
 
 		if(playertextid == twk_Unlock[playerid])
@@ -250,18 +250,6 @@ hook OnPlayerClickPlayerTD(playerid, PlayerText:playertextid)
 		}
 	}
 }
-
-hook OnPlayerClickTextDraw(playerid, Text:clickedid)
-{
-	if(clickedid == Text:65535)
-	{
-	 	if(twk_Locked[playerid])
-		{
-		    _twk_ToggleMouse(playerid, true);
-		}
-	}
-}
-
 
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
@@ -358,12 +346,6 @@ _twk_AdjustItemPos(playerid, Float:distance, Float:direction, /*Float:rx, Float:
 	SetItemPos(twk_Item[playerid], new_x, new_y, new_z);
 	SetItemRot(twk_Item[playerid], rx, ry, rz);
 
-	new Float:x, Float:y, Float:z;
-	GetPlayerPos(playerid, x, y, z);
-	SetPlayerPos(playerid, x, y, z);
-	SetPlayerFacingAngle(playerid, GetAngleToPoint(x, y, new_x, new_y) + 10);
-	SetCameraBehindPlayer(playerid);
-	
 	CallLocalFunction("OnItemTweakUpdate", "dd", playerid, _:twk_Item[playerid]);
 
 	return 0;
@@ -530,16 +512,10 @@ hook OnPlayerLeaveDynArea(playerid, areaid)
 
 ==============================================================================*/
 
-hook OnPlayerPickUpItem(playerid, Item:itemid){
-	if(IsValidItem(twk_Item[playerid]))
-		return Y_HOOKS_BREAK_RETURN_1;
 
-	return Y_HOOKS_CONTINUE_RETURN_0;
-}
-
-hook OnPlayerUseItem(playerid, Item:itemid){
-	if(IsValidItem(twk_Item[playerid]))
-		return Y_HOOKS_BREAK_RETURN_1;
-
-	return Y_HOOKS_CONTINUE_RETURN_0;
-}
+/*
+item pickup, drop
+item use
+inventory open
+container open
+*/

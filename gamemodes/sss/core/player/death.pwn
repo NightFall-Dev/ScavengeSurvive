@@ -34,14 +34,7 @@ hook OnPlayerConnect(playerid)
 	death_LastKilledBy[playerid][0] = EOS;
 	death_LastKilledById[playerid] = INVALID_PLAYER_ID;
 
-	TextDrawHideForPlayer(playerid, DeathText);
-	TextDrawHideForPlayer(playerid, DeathButton);
 	return 1;
-}
-
-hook OnPlayerDisconnect(playerid, reason)
-{
-	death_Dying[playerid] = false;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
@@ -404,16 +397,12 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 		CancelSelectTextDraw(playerid);
 		TextDrawHideForPlayer(playerid, DeathText);
 		TextDrawHideForPlayer(playerid, DeathButton);
-		SetPlayerBrightness(playerid, 255);
-		defer SpawnDeathDelay(playerid);
+		SpawnLoggedInPlayer(playerid);
 	}
 
 	return 1;
 }
 
-timer SpawnDeathDelay[1500](playerid)
-	SpawnLoggedInPlayer(playerid);
-	
 hook OnGameModeInit()
 {
 	DeathText					=TextDrawCreate(320.000000, 300.000000, "YOU ARE DEAD!");

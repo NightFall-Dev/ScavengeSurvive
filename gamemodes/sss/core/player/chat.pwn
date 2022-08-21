@@ -239,9 +239,6 @@ PlayerSendChat(playerid, chat[], Float:frequency)
 
 		foreach(new i : Player)
 		{
-			if(!IsPlayerLoggedIn(i)) 
-				continue ; 
-				
 			if(-0.05 < frequency - chat_Freq[i] < 0.05)
 			{
 				SendClientMessage(i, CHAT_RADIO, line1);
@@ -259,7 +256,7 @@ PlayerSendChat(playerid, chat[], Float:frequency)
 
 stock GetPlayerChatMode(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return chat_Mode[playerid];
@@ -277,7 +274,7 @@ stock SetPlayerChatMode(playerid, chatmode)
 
 stock IsPlayerGlobalQuiet(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return chat_Quiet[playerid];
@@ -285,7 +282,7 @@ stock IsPlayerGlobalQuiet(playerid)
 
 stock Float:GetPlayerRadioFrequency(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0.0;
 
 	return chat_Freq[playerid];

@@ -32,36 +32,58 @@ hook OnPlayerScriptUpdate(playerid)
 
 	new
 		intensity = GetPlayerInfectionIntensity(playerid, 0),
-		E_MOVEMENT_TYPE:movementstate,
-		Float:food = GetPlayerFP(playerid);
+		animidx = GetPlayerAnimationIndex(playerid),
+		k,
+		ud,
+		lr,
+		Float:food;
 
-	if(food > 100.0)
-		food = 100.0;
+	GetPlayerKeys(playerid, k, ud, lr);
+	food = GetPlayerFP(playerid);
 
 	if(intensity)
 	{
 		food -= IDLE_FOOD_RATE;
 	}
 
-	GetPlayerMovementState(playerid, movementstate);
-
-	switch(movementstate)
+	if(animidx == 43) // Sitting
 	{
-		case E_MOVEMENT_TYPE_UNKNOWN:	food -= IDLE_FOOD_RATE;
-		case E_MOVEMENT_TYPE_IDLE:		food -= IDLE_FOOD_RATE;
-		case E_MOVEMENT_TYPE_SITTING:	food -= IDLE_FOOD_RATE * 0.2;
-		case E_MOVEMENT_TYPE_CROUCHING:	food -= IDLE_FOOD_RATE * 1.1;
-		case E_MOVEMENT_TYPE_JUMPING:	food -= IDLE_FOOD_RATE * 3.2;
-		case E_MOVEMENT_TYPE_WALKING:	food -= IDLE_FOOD_RATE * 1.2;
-		case E_MOVEMENT_TYPE_RUNNING:	food -= IDLE_FOOD_RATE * 1.8;
-		case E_MOVEMENT_TYPE_STOPPING:	food -= IDLE_FOOD_RATE;
-		case E_MOVEMENT_TYPE_SPRINTING:	food -= IDLE_FOOD_RATE * 2.2;
-		case E_MOVEMENT_TYPE_CLIMBING:	food -= IDLE_FOOD_RATE * 3.5;
-		case E_MOVEMENT_TYPE_FALLING:	food -= IDLE_FOOD_RATE;
-		case E_MOVEMENT_TYPE_LANDING:	food -= IDLE_FOOD_RATE * 2.0;
-		case E_MOVEMENT_TYPE_SWIMMING:	food -= IDLE_FOOD_RATE * 4.0;
-		case E_MOVEMENT_TYPE_DIVING:	food -= IDLE_FOOD_RATE * 2.2;
+		food -= IDLE_FOOD_RATE * 0.2;
 	}
+	else if(animidx == 1159) // Crouching
+	{
+		food -= IDLE_FOOD_RATE * 1.1;
+	}
+	else if(animidx == 1195) // Jumping
+	{
+		food -= IDLE_FOOD_RATE * 3.2;
+	}
+	else if(animidx == 1231) // Running
+	{
+		if(k & KEY_WALK) // Walking
+		{
+			food -= IDLE_FOOD_RATE * 1.2;
+		}
+		else if(k & KEY_SPRINT) // Sprinting
+		{
+			food -= IDLE_FOOD_RATE * 2.2;
+		}
+		else if(k & KEY_JUMP) // Jump
+		{
+			food -= IDLE_FOOD_RATE * 3.2;
+		}
+		else
+		{
+			food -= IDLE_FOOD_RATE * 2.0;
+		}
+	}
+	else
+	{
+		food -= IDLE_FOOD_RATE;
+	}
+
+	if(food > 100.0)
+		food = 100.0;
 
 	if(!IsPlayerUnderDrugEffect(playerid, drug_Morphine) && !IsPlayerUnderDrugEffect(playerid, drug_Air))
 	{
@@ -112,17 +134,6 @@ stock TogglePlayerHungerBar(playerid, bool:toggle)
 
 hook OnPlayerSpawnChar(playerid)
 {
-	UpdateFoodBarWithScaleProfile(playerid);
-}
-
-hook OnPlayerSpawnNewChar(playerid)
-{
-	UpdateFoodBarWithScaleProfile(playerid);
-}
-
-hook OnPlayerConnect(playerid)
-{
-	HungerBar[playerid] = INVALID_PLAYER_BAR_ID;
 	UpdateFoodBarWithScaleProfile(playerid);
 }
 

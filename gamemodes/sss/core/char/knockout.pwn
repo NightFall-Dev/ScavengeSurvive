@@ -262,7 +262,7 @@ _vehicleCheck(playerid)
 
 stock GetPlayerKnockOutTick(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return knockout_Tick[playerid];
@@ -270,7 +270,7 @@ stock GetPlayerKnockOutTick(playerid)
 
 stock GetPlayerKnockoutDuration(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return knockout_Duration[playerid];
@@ -278,7 +278,7 @@ stock GetPlayerKnockoutDuration(playerid)
 
 stock GetPlayerKnockOutRemainder(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	if(!knockout_KnockedOut[playerid])
@@ -289,7 +289,7 @@ stock GetPlayerKnockOutRemainder(playerid)
 
 stock IsPlayerKnockedOut(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return knockout_KnockedOut[playerid];

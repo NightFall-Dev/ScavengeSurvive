@@ -14,6 +14,8 @@
 
 
 #include <YSI_Coding\y_hooks>
+#include <YSI\y_va>
+
 
 enum
 {

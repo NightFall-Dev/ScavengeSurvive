@@ -62,9 +62,7 @@ Timer:		sup_UpdateTimer,
 			sup_ObjPara = INVALID_OBJECT_ID,
 Float:		sup_DropX,
 Float:		sup_DropY,
-Float:		sup_DropZ,
-Container:	sup_Containerid = INVALID_CONTAINER_ID,
-Button:		sup_Button = INVALID_BUTTON_ID;
+Float:		sup_DropZ;
 
 
 hook OnGameModeInit()
@@ -286,6 +284,7 @@ SupplyCrateLand()
 	}
 
 	new
+		Container:containerid,
 		Float:a,
 		Float:x,
 		Float:y,
@@ -304,19 +303,12 @@ SupplyCrateLand()
 		}		
 	}
 
-	if(sup_Containerid != INVALID_CONTAINER_ID)
-		DestroyContainer(sup_Containerid);
-
-	if(sup_Button != INVALID_BUTTON_ID)
-		DestroyButton(sup_Button);
-		
-	sup_Containerid = CreateContainer("Supply Crate", 32);
-	sup_Button = CreateButton(sup_DropX + 1.5, sup_DropY, sup_DropZ + 1.0, "Supply Crate", .label = 1, .labeltext = "Supply Crate");
+	// containerid = CreateContainer("Supply Crate", 32, CreateButton(sup_DropX + 1.5, sup_DropY, sup_DropZ + 1.0, "Supply Crate", .label = 1, .labeltext = "Supply Crate"));
 
 	lootindex = GetLootIndexFromName(sup_TypeData[sup_CurrentType][supt_loot]);
-	FillContainerWithLoot(Container:sup_Containerid, 4 + random(16), lootindex);
-	GetContainerFreeSlots(Container:sup_Containerid, freeslots);
-	dbg("supply-crate", 2, "[SupplyCrateLand] Spawned %d items in supply crate container %d", 32 - freeslots, _:sup_Containerid);
+	FillContainerWithLoot(containerid, 4 + random(16), lootindex);
+	GetContainerFreeSlots(containerid, freeslots);
+	dbg("supply-crate", 2, "[SupplyCrateLand] Spawned %d items in supply crate container %d", 32 - freeslots, _:containerid);
 
 	DestroyDynamicObject(sup_ObjPara);
 	sup_CurrentType = -1;
@@ -327,12 +319,6 @@ SupplyCrateLand()
 	sup_LastSupplyDrop = GetTickCount();
 
 	return;
-}
-
-hook OnButtonPress(playerid, Button:id)
-{
-	if(id == sup_Button)
-		DisplayContainerInventory(playerid, Container:sup_Containerid);
 }
 
 hook OnDynamicObjectMoved(objectid)

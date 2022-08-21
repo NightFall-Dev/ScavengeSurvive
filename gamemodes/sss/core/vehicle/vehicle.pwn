@@ -167,7 +167,7 @@ SetPlayerVehicleSpeedUI(playerid, const str[])
 ==============================================================================*/
 
 
-stock CreateWorldVehicle(type, Float:x, Float:y, Float:z, Float:r, colour1, colour2, world = 0, const uuid[UUID_LEN] = "")
+stock CreateWorldVehicle(type, Float:x, Float:y, Float:z, Float:r, colour1, colour2, world = 0, uuid[UUID_LEN] = "")
 {
 	if(!(0 <= type < veh_TypeTotal))
 	{
@@ -277,7 +277,7 @@ stock RespawnVehicle(vehicleid)
 ==============================================================================*/
 
 
-_veh_create(type, Float:x, Float:y, Float:z, Float:r, colour1, colour2, world = 0, const uuid[UUID_LEN] = "")
+_veh_create(type, Float:x, Float:y, Float:z, Float:r, colour1, colour2, world = 0, uuid[UUID_LEN] = "")
 {
 	new vehicleid = CreateVehicle(GetVehicleTypeModel(type), x, y, z, r, colour1, colour2, 864000);
 
@@ -730,9 +730,6 @@ HideVehicleUI(playerid)
 
 public OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 {
-	if(IsItemTypeCarry(ItemType:GetItemType(GetPlayerItem(playerid))))
-		PlayerDropItem(playerid);
-		
 	if(!ispassenger)
 		veh_Entering[playerid] = vehicleid;
 
@@ -743,7 +740,6 @@ public OnPlayerExitVehicle(playerid, vehicleid)
 {
 	veh_Data[vehicleid][veh_lastUsed] = GetTickCount();
 	veh_ExitTick[playerid] = GetTickCount();
-	return 1;
 }
 
 public OnVehicleDamageStatusUpdate(vehicleid, playerid)
@@ -754,8 +750,6 @@ public OnVehicleDamageStatusUpdate(vehicleid, playerid)
 		veh_Data[vehicleid][veh_doors],
 		veh_Data[vehicleid][veh_lights],
 		veh_Data[vehicleid][veh_tires]);
-		
-	return 1;
 }
 
 hook OnUnoccupiedVehicleUpd(vehicleid, playerid, passenger_seat, Float:new_x, Float:new_y, Float:new_z, Float:vel_x, Float:vel_y, Float:vel_z)
@@ -1195,7 +1189,7 @@ stock GetPlayerVehicleEnterTick(playerid)
 // veh_ExitTick
 stock GetPlayerVehicleExitTick(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return veh_ExitTick[playerid];

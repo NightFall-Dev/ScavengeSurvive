@@ -92,9 +92,6 @@ stock ShowKeypad(playerid, keypadid, match = -1)
 	kp_Match[playerid] = match;
 	kp_CurrentID[playerid] = keypadid;
 	KeypadUpdateDisplay(playerid);
-	
-	HideActionText(playerid);
-	PlayerPlaySound(playerid, 21002, 0.0, 0.0, 0.0); // Keyboard sound
 
 	return 1;
 }
@@ -119,8 +116,6 @@ stock HideKeypad(playerid)
 
 	if(kp_Hacking[playerid])
 	{
-		kp_Hacking[playerid] = 0;
-		kp_HackTries[playerid] = 0;
 		stop kp_HackTimer[playerid];
 		ClearAnimations(playerid);
 	}
@@ -148,8 +143,6 @@ stock HideKeypad(playerid)
 	kp_CurrentID[playerid] = -1;
 	kp_Value[playerid] = 0;
 	kp_Match[playerid] = 0;
-	
-	PlayerPlaySound(playerid, 21002, 0.0, 0.0, 0.0); // Keyboard sound
 
 	return 1;
 }
@@ -172,12 +165,9 @@ stock CancelKeypad(playerid)
 
 stock HackKeypad(playerid, keypadid, match)
 {
-	if(kp_Hacking[playerid] != 1)
-	{
-		kp_Hacking[playerid] = 1;
-		kp_HackTimer[playerid] = repeat HackKeypadUpdate(playerid, keypadid, match);
-		ApplyAnimation(playerid, "COP_AMBIENT", "COPBROWSE_LOOP", 4.0, 1, 0, 0, 0, 0);
-	}
+	kp_Hacking[playerid] = 1;
+	kp_HackTimer[playerid] = repeat HackKeypadUpdate(playerid, keypadid, match);
+	ApplyAnimation(playerid, "COP_AMBIENT", "COPBROWSE_LOOP", 4.0, 1, 0, 0, 0, 0);
 }
 
 timer HackKeypadUpdate[100](playerid, keypadid, match)
@@ -208,7 +198,8 @@ timer HackKeypadUpdate[100](playerid, keypadid, match)
 			defer kp_PrtDestroy(playerid);
 			GivePlayerHP(playerid, -5);
 			KnockOutPlayer(playerid, 3000);
-			defer HackKeypadFinish(playerid, keypadid, kp_Value[playerid], match);
+			HideKeypad(playerid);
+			HackKeypadFinish(playerid, keypadid, kp_Value[playerid], match);
 		}
 
 		return;
@@ -224,6 +215,7 @@ timer HackKeypadUpdate[100](playerid, keypadid, match)
 
 timer HackKeypadFinish[1000](playerid, keypadid, code, match)
 {
+	HideKeypad(playerid);
 	CallLocalFunction("OnPlayerKeypadEnter", "dddd", playerid, keypadid, code, match);
 }
 
@@ -292,7 +284,7 @@ KeypadEnter(playerid)
 	// 	@.cb(kp_CallbackResponse[playerid], playerid, 0xFFFFFFFF, kp_Value[playerid], kp_Match[playerid]);
 
 	// else
-	ret = CallLocalFunction("OnPlayerKeypadEnter", "dddd", playerid, kp_CurrentID[playerid], kp_Value[playerid], kp_Match[playerid]);
+	// 	ret = CallLocalFunction("OnPlayerKeypadEnter", "dddd", playerid, kp_CurrentID[playerid], kp_Value[playerid], kp_Match[playerid]);
 
 	if(ret || kp_Value[playerid] == kp_Match[playerid])
 		HideKeypad(playerid);
@@ -307,8 +299,6 @@ KeypadAddNumber(playerid, number)
 
 	kp_Value[playerid] = result;
 	KeypadUpdateDisplay(playerid);
-	
-	PlayerPlaySound(playerid, 17006, 0.0, 0.0, 0.0); // Number sound
 
 	return 1;
 }

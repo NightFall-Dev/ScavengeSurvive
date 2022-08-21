@@ -416,7 +416,7 @@ PlayerSpawnNewCharacter(playerid, gender)
 // spawn_State
 stock IsPlayerSpawned(playerid)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	return spawn_State[playerid];
@@ -424,7 +424,7 @@ stock IsPlayerSpawned(playerid)
 
 stock SetPlayerSpawnedState(playerid, bool:st)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	spawn_State[playerid] = st;
@@ -437,7 +437,7 @@ stock SetPlayerSpawnedState(playerid, bool:st)
 // spawn_PosZ
 stock GetPlayerSpawnPos(playerid, &Float:x, &Float:y, &Float:z)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	x = spawn_PosX[playerid];
@@ -462,7 +462,7 @@ stock SetPlayerSpawnPos(playerid, Float:x, Float:y, Float:z)
 // spawn_RotZ
 stock GetPlayerSpawnRot(playerid, &Float:r)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	r = spawn_RotZ[playerid];

@@ -190,13 +190,7 @@ hook OnItemAddToInventory(playerid, Item:itemid, slot)
 		if(IsValidHolsterItem(GetItemType(itemid)))
 			return Y_HOOKS_BREAK_RETURN_1;
 	}
-	
-	if(IsPlayerConnected(playerid))
-	{
-		if(!IsPlayerViewingInventory(playerid))
-			hols_LastHolster[playerid] = GetTickCount();
-	}
-	
+
 	return Y_HOOKS_CONTINUE_RETURN_0;
 }
 
@@ -216,10 +210,6 @@ _HolsterChecks(playerid)
 	if(GetPlayerAnimationIndex(playerid) == 1381)
 		return 0;
 
-	// Put item animation
-	if(GetPlayerAnimationIndex(playerid) == 638)
-		return 0;
-		
 	// Within 1 second of previously holstering/unholstering
 	if(GetTickCountDifference(GetTickCount(), hols_LastHolster[playerid]) < 1000)
 		return 0;
@@ -282,9 +272,6 @@ timer HolsterItemDelay[time](playerid, itemid, time)
 	if(!IsValidItem(Item:itemid))
 		return 0;
 
-	if(GetPlayerItem(playerid) != Item:itemid)
-		return 0;
-		
 	new Item:currentitem = hols_Item[playerid];
 
 	if(Item:itemid == currentitem)
@@ -295,7 +282,7 @@ timer HolsterItemDelay[time](playerid, itemid, time)
 	}
 
 	SetPlayerHolsterItem(playerid, Item:itemid);
-	//ClearAnimations(playerid);
+	ClearAnimations(playerid);
 
 	if(IsValidItem(currentitem))
 	{
@@ -370,33 +357,6 @@ hook OnPlayerGiveItem(playerid, targetid, Item:itemid)
 	return Y_HOOKS_CONTINUE_RETURN_0;
 }
 
-hook OnPlayerOpenInventory(playerid)
-{
-	if(GetTickCountDifference(GetTickCount(), hols_LastHolster[playerid]) < 1000)
-	{
-		HidePlayerGear(playerid);
-		HidePlayerHealthInfo(playerid);
-		ClosePlayerInventory(playerid, true);
-		CancelSelectTextDraw(playerid);
-		return Y_HOOKS_BREAK_RETURN_1;
-	}
-
-	return Y_HOOKS_CONTINUE_RETURN_0;
-}
-
-hook OnPlayerOpenContainer(playerid, Container:containerid)
-{
-	if(GetTickCountDifference(GetTickCount(), hols_LastHolster[playerid]) < 1000)
-	{
-		HidePlayerGear(playerid);
-		HidePlayerHealthInfo(playerid);
-		ClosePlayerContainer(playerid, true);
-		CancelSelectTextDraw(playerid);
-		return Y_HOOKS_BREAK_RETURN_1;
-	}
-
-	return Y_HOOKS_CONTINUE_RETURN_0;
-}
 
 /*==============================================================================
 

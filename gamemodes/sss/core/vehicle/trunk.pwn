@@ -103,7 +103,7 @@ hook OnPlayerCloseContainer(playerid, Container:containerid)
 		if(containerid == GetVehicleContainer(trunk_CurrentVehicle[playerid]))
 		{
 			VehicleBootState(trunk_CurrentVehicle[playerid], 0);
-			VehicleTrunkUpdateSave(playerid);
+
 			trunk_CurrentVehicle[playerid] = INVALID_VEHICLE_ID;
 		}
 	}
@@ -139,16 +139,30 @@ VehicleTrunkUpdateSave(playerid)
 {
 	if(IsValidVehicle(trunk_CurrentVehicle[playerid]))
 	{
-		new
-			Float:x,
-			Float:y,
-			Float:z,
-			Float:r;
+		new owner[MAX_PLAYER_NAME];
 
-		SaveVehicle(trunk_CurrentVehicle[playerid]);
-		GetVehiclePos(trunk_CurrentVehicle[playerid], x, y, z);
-		GetVehicleZAngle(trunk_CurrentVehicle[playerid], r);
-		SetVehicleSpawnPoint(trunk_CurrentVehicle[playerid], x, y, z, r);
+		GetVehicleOwner(trunk_CurrentVehicle[playerid], owner);
+
+		if(!isnull(owner))
+		{
+			new name[MAX_PLAYER_NAME];
+
+			GetPlayerName(playerid, name, MAX_PLAYER_NAME);
+
+			if(!strcmp(owner, name))
+			{
+				new
+					Float:x,
+					Float:y,
+					Float:z,
+					Float:r;
+
+				SaveVehicle(trunk_CurrentVehicle[playerid]);
+				GetVehiclePos(trunk_CurrentVehicle[playerid], x, y, z);
+				GetVehicleZAngle(trunk_CurrentVehicle[playerid], r);
+				SetVehicleSpawnPoint(trunk_CurrentVehicle[playerid], x, y, z, r);
+			}
+		}
 	}
 }
 

@@ -24,19 +24,6 @@ hook OnPlayerConnect(playerid)
 	lsk_TargetVehicle[playerid] = INVALID_VEHICLE_ID;
 }
 
-hook OnItemCreate(Item:itemid)
-{
-	if(GetItemType(itemid) == item_Key)
-	{
-		SetItemArrayDataSize(itemid, 2);
-	}
-
-	if(GetItemType(itemid) == item_WheelLock)
-	{
-		SetItemArrayDataSize(itemid, 2);
-	}
-}
-
 public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 {
 	if(225.0 < angle < 315.0)
@@ -52,8 +39,6 @@ public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 		
 		if(itemtype == item_LocksmithKit)
 		{
-			CancelPlayerMovement(playerid);
-			
 			if(!IsVehicleTypeLockable(vehicletype))
 			{
 				ShowActionText(playerid, ls(playerid, "LOCKNODOORS", true), 3000);
@@ -65,17 +50,16 @@ public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 				ShowActionText(playerid, ls(playerid, "LOCKALREADY", true), 3000);
 				return Y_HOOKS_BREAK_RETURN_1;
 			}
-			
+
+			CancelPlayerMovement(playerid);
 			StartCraftingKey(playerid, vehicleid);
 		}
 
 		if(itemtype == item_WheelLock)
 		{
-			CancelPlayerMovement(playerid);
-			
 			new key;
 			GetItemArrayDataAtCell(itemid, key, 0);
-			if(key != 0)
+			if(key == 0)
 			{
 				ShowActionText(playerid, ls(playerid, "LOCKCHNOKEY", true), 3000);
 				return Y_HOOKS_BREAK_RETURN_1;
@@ -87,13 +71,12 @@ public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 				return Y_HOOKS_BREAK_RETURN_1;
 			}
 
+			CancelPlayerMovement(playerid);
 			StartCraftingKey(playerid, vehicleid);
 		}
 
 		if(itemtype == item_Key)
 		{
-			CancelPlayerMovement(playerid);
-			
 			new
 				keyid,
 				vehiclekey = GetVehicleKey(vehicleid);
@@ -118,6 +101,8 @@ public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 				return Y_HOOKS_BREAK_RETURN_1;
 			}
 
+			CancelPlayerMovement(playerid);
+
 			// Update old keys to the correct vehicle type.
 			SetItemArrayDataAtCell(itemid, vehicletype, 1);
 
@@ -137,13 +122,12 @@ public OnPlayerInteractVehicle(playerid, vehicleid, Float:angle)
 			if(IsVehicleTypeTrailer(vehicletype))
 				SaveVehicle(GetTrailerVehicleID(vehicleid));
 
-			SaveVehicle(vehicleid);
+			else
+				SaveVehicle(vehicleid);
 		}
 
 		if(itemtype == item_LockBreaker)
 		{
-			CancelPlayerMovement(playerid);
-			
 			if(GetVehicleKey(vehicleid) == 0)
 			{
 				ShowActionText(playerid, ls(playerid, "LOCKVNOLOCK", true), 3000);

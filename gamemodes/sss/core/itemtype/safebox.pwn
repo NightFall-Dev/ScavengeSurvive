@@ -216,7 +216,6 @@ hook OnPlayerCloseContainer(playerid, containerid)
 	if(IsValidItem(box_CurrentBoxItem[playerid]))
 	{
 		CancelPlayerMovement(playerid);
-		box_CurrentBoxItem[playerid] = INVALID_ITEM_ID;
 	}
 }
 

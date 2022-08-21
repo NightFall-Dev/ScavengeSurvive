@@ -16,14 +16,8 @@
 #include <YSI_Coding\y_hooks>
 
 
-#define MAX_BLOOD_OBJECTS 15
-
-
 static
-Float:	bld_BleedRate[MAX_PLAYERS],
-bool:	Bleeding[MAX_PLAYERS],
-		BloodObjectIndex[MAX_PLAYERS],
-		BloodObjects[MAX_PLAYERS][MAX_BLOOD_OBJECTS];
+Float:	bld_BleedRate[MAX_PLAYERS];
 
 
 hook OnPlayerScriptUpdate(playerid)
@@ -47,9 +41,7 @@ hook OnPlayerScriptUpdate(playerid)
 	{
 		new
 			Float:hp = GetPlayerHP(playerid),
-			Float:slowrate;
-		
-		GetPlayerBleedSlowRate(hp, bld_BleedRate[playerid], GetPlayerWounds(playerid), slowrate);
+			Float:slowrate = (((((100.0 - hp) / 360.0) * bld_BleedRate[playerid]) / GetPlayerWounds(playerid)) / 100.0);
 
 		if(frandom(1.0) < 0.7)
 		{
@@ -70,26 +62,20 @@ hook OnPlayerScriptUpdate(playerid)
 		if(random(100) < 50)
 			bld_BleedRate[playerid] -= slowrate;
 
-		//if(debug_conditional("gamemodes/sss/core/char/bleed.pwn", 1))
-			//ShowActionText(playerid, sprintf("HP: %f Bleed-rate: %f~n~Wounds %d Bleed slow-rate: %f", hp, bld_BleedRate[playerid], GetPlayerWounds(playerid)));
+		if(debug_conditional(\"gamemodes/sss/core/char/bleed.pwn\", 1))
+			ShowActionText(playerid, sprintf("HP: %f Bleed-rate: %f~n~Wounds %d Bleed slow-rate: %f", hp, bld_BleedRate[playerid], GetPlayerWounds(playerid)));
 
 		if(!IsPlayerInAnyVehicle(playerid))
 		{
 			if(IsPlayerAttachedObjectSlotUsed(playerid, ATTACHSLOT_BLOOD))
 			{
 				if(frandom(0.1) < 0.1 - bld_BleedRate[playerid])
-				{
 					RemovePlayerAttachedObject(playerid, ATTACHSLOT_BLOOD);
-					Bleeding[playerid] = false;
-				}
 			}
 			else
 			{
 				if(frandom(0.1) < bld_BleedRate[playerid])
-				{
-					SetPlayerAttachedObject(playerid, ATTACHSLOT_BLOOD, /*18706*/ 18706, 1,  0.088999, 0.020000, 0.044999,  0.088999, 0.020000, 0.044999,  1.179000, 1.510999, 0.005000);
-					Bleeding[playerid] = true;
-				}
+					SetPlayerAttachedObject(playerid, ATTACHSLOT_BLOOD, 18706, 1,  0.088999, 0.020000, 0.044999,  0.088999, 0.020000, 0.044999,  1.179000, 1.510999, 0.005000);
 			}
 		}
 		else
@@ -118,34 +104,6 @@ hook OnPlayerScriptUpdate(playerid)
 			GivePlayerHP(playerid, 0.5);
 	}
 
-	if(Bleeding[playerid])
-	{
-		new
-			Float:x,
-			Float:y,
-			Float:z,
-			Float:r,
-			worldid = GetPlayerVirtualWorld(playerid),
-			interiorid = GetPlayerInterior(playerid),
-			idx = BloodObjectIndex[playerid];
-
-		idx++;
-		if(idx == MAX_BLOOD_OBJECTS)
-			idx = 0;
-
-		GetPlayerPos(playerid, x, y, z);
-		GetPlayerFacingAngle(playerid, r);
-
-		x += 0.1 * (3 - random(6));
-		y += 0.1 * (3 - random(6));
-		r += 0.1 * random(3600);
-
-		DestroyDynamicObject(BloodObjects[playerid][idx]);
-		BloodObjects[playerid][idx] = CreateDynamicObject(19836, x, y, z - 0.9, 0.0, 0.0, r, worldid, interiorid);
-
-		BloodObjectIndex[playerid] = idx;
-	}
-
 	return;
 }
 
@@ -161,13 +119,9 @@ stock SetPlayerBleedRate(playerid, Float:rate)
 
 stock GetPlayerBleedRate(playerid, &Float:bleedrate)
 {
-	if(!IsPlayerConnected(playerid))
+	if(!IsValidPlayerID(playerid))
 		return 0;
 
 	bleedrate = bld_BleedRate[playerid];
 	return 1;
-}
-
-stock GetPlayerBleedSlowRate(Float:hp, Float:bleedrate, wounds, &Float:rate) {
-	rate = (((((100.0 - hp) / 360.0) * bleedrate) / wounds) / 100.0);
 }

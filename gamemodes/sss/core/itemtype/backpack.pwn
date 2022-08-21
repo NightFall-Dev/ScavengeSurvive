@@ -23,24 +23,20 @@ enum E_BAG_TYPE_DATA
 {
 			bag_name[MAX_ITEM_NAME],
 ItemType:	bag_itemtype,
-			bag_size
+			bag_size,
+Float:		bag_attachOffsetX,
+Float:		bag_attachOffsetY,
+Float:		bag_attachOffsetZ,
+Float:		bag_attachRotX,
+Float:		bag_attachRotY,
+Float:		bag_attachRotZ,
+Float:		bag_attachScaleX,
+Float:		bag_attachScaleY,
+Float:		bag_attachScaleZ
 }
 
-enum E_BAG_FLOAT_DATA
-{
-Float:		bag_offs_x,
-Float:		bag_offs_y,
-Float:		bag_offs_z,
-Float:		bag_offs_rx,
-Float:		bag_offs_ry,
-Float:		bag_offs_rz,
-Float:		bag_offs_sx,
-Float:		bag_offs_sy,
-Float:		bag_offs_sz
-}
 
 static
-			bag_TypeDataFloat[MAX_BAG_TYPE][312][E_BAG_FLOAT_DATA],
 			bag_TypeData[MAX_BAG_TYPE][E_BAG_TYPE_DATA],
 			bag_TypeTotal,
 			bag_ItemTypeBagType[MAX_ITEM_TYPE] = {-1, ...};
@@ -96,7 +92,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock DefineBagType(const name[MAX_ITEM_NAME], ItemType:itemtype, size)
+stock DefineBagType(const name[MAX_ITEM_NAME], ItemType:itemtype, size, Float:attachOffsetX, Float:attachOffsetY, Float:attachOffsetZ, Float:attachRotX, Float:attachRotY, Float:attachRotZ, Float:attachScaleX, Float:attachScaleY, Float:attachScaleZ)
 {
 	if(bag_TypeTotal == MAX_BAG_TYPE)
 		return -1;
@@ -106,24 +102,19 @@ stock DefineBagType(const name[MAX_ITEM_NAME], ItemType:itemtype, size)
 	bag_TypeData[bag_TypeTotal][bag_name]			= name;
 	bag_TypeData[bag_TypeTotal][bag_itemtype]		= itemtype;
 	bag_TypeData[bag_TypeTotal][bag_size]			= size;
+	bag_TypeData[bag_TypeTotal][bag_attachOffsetX]	= attachOffsetX;
+	bag_TypeData[bag_TypeTotal][bag_attachOffsetY]	= attachOffsetY;
+	bag_TypeData[bag_TypeTotal][bag_attachOffsetZ]	= attachOffsetZ;
+	bag_TypeData[bag_TypeTotal][bag_attachRotX]		= attachRotX;
+	bag_TypeData[bag_TypeTotal][bag_attachRotY]		= attachRotY;
+	bag_TypeData[bag_TypeTotal][bag_attachRotZ]		= attachRotZ;
+	bag_TypeData[bag_TypeTotal][bag_attachScaleX]	= attachScaleX;
+	bag_TypeData[bag_TypeTotal][bag_attachScaleY]	= attachScaleY;
+	bag_TypeData[bag_TypeTotal][bag_attachScaleZ]	= attachScaleZ;
 
 	bag_ItemTypeBagType[itemtype] = bag_TypeTotal;
 
 	return bag_TypeTotal++;
-}
-
-stock SetBagOffsetsForSkin(bagtype, skinid, Float:x, Float:y, Float:z, Float:rx, Float:ry, Float:rz, Float:sx, Float:sy, Float:sz){
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_x] = x;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_y] = y;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_z] = z;
-
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_rx] = rx;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_ry] = ry;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_rz] = rz;
-
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_sx] = sx;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_sy] = sy;
-    bag_TypeDataFloat[bagtype][skinid][bag_offs_sz] = sz;
 }
 
 stock GivePlayerBag(playerid, Item:itemid)
@@ -152,20 +143,19 @@ stock GivePlayerBag(playerid, Item:itemid)
 
 		bag_PlayerBagID[playerid] = itemid;
 
-		new model, skinid = GetPlayerSkin(playerid);
-		
+		new model;
 		GetItemTypeModel(bag_TypeData[bagtype][bag_itemtype], model);
 
 		SetPlayerAttachedObject(playerid, ATTACHSLOT_BAG, model, 1,
-			bag_TypeDataFloat[bagtype][skinid][bag_offs_x],
-  			bag_TypeDataFloat[bagtype][skinid][bag_offs_y],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_z],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_rx],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_ry],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_rz],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_sx],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_sy],
-		    bag_TypeDataFloat[bagtype][skinid][bag_offs_sz], colour, colour);
+			bag_TypeData[bagtype][bag_attachOffsetX],
+			bag_TypeData[bagtype][bag_attachOffsetY],
+			bag_TypeData[bagtype][bag_attachOffsetZ],
+			bag_TypeData[bagtype][bag_attachRotX],
+			bag_TypeData[bagtype][bag_attachRotY],
+			bag_TypeData[bagtype][bag_attachRotZ],
+			bag_TypeData[bagtype][bag_attachScaleX],
+			bag_TypeData[bagtype][bag_attachScaleY],
+			bag_TypeData[bagtype][bag_attachScaleZ], colour, colour);
 
 		bag_ContainerItem[containerid] = itemid;
 		bag_ContainerPlayer[containerid] = playerid;
@@ -247,7 +237,7 @@ stock AddItemToPlayer(playerid, Item:itemid, useinventory = false, playeraction 
 {
 	new ItemType:itemtype = GetItemType(itemid);
 
-	if(IsItemTypeCarry(itemtype)  || IsValidHolsterItem(itemtype))
+	if(IsItemTypeCarry(itemtype))
 		return -1;
 
 	new required;
@@ -453,7 +443,7 @@ _BagEquipHandler(playerid)
 	}
 	else
 	{
-		AddItemToPlayer(playerid, itemid, true);
+		AddItemToPlayer(playerid, itemid);
 	}
 
 	return 1;
@@ -544,7 +534,7 @@ PlayerBagUpdate(playerid)
 	{
 		if(GetPlayerDist3D(playerid, bag_LookingInBag[playerid]) > 1.0)
 		{
-			ClosePlayerContainer(playerid, true);
+			ClosePlayerContainer(playerid);
 			CancelSelectTextDraw(playerid);
 			bag_LookingInBag[playerid] = -1;
 		}
@@ -597,7 +587,7 @@ hook OnPlayerAddToInventory(playerid, Item:itemid, success)
 		if(IsItemTypeBag(itemtype))
 			return Y_HOOKS_BREAK_RETURN_1;
 
-		if(IsItemTypeCarry(itemtype) || IsValidHolsterItem(itemtype))
+		if(IsItemTypeCarry(itemtype))
 			return Y_HOOKS_BREAK_RETURN_1;
 
 		new
@@ -730,9 +720,7 @@ hook OnPlayerSelectCntOpt(playerid, Container:containerid, option)
 
 			if(required > 0)
 				ShowActionText(playerid, sprintf(ls(playerid, "BAGEXTRASLO", true), required), 3000, 150);
-			else
-				RemoveItemFromContainer(containerid, slot, playerid);
-				
+
 			DisplayContainerInventory(playerid, containerid);
 		}
 	}

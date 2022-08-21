@@ -15,8 +15,13 @@ import (
 func RunServer(ctx context.Context, ps *pubsub.PubSub, r io.Reader, w io.Writer, once bool) {
 	zap.L().Info("starting blocking process")
 
+	// a signaller that uses logs to understand when the gamemode is restarting
+	// with gmx that means this program can kill the process and restart it.
+	restartKiller := make(chan struct{})
+	outputWriter := LogParser(restartKiller)
+
 	for {
-		err := runBlocking(ctx, ps, r, w)
+		err := runBlocking(ctx, restartKiller, r, outputWriter)
 		if err != nil {
 			if err == context.Canceled {
 				break
@@ -33,11 +38,11 @@ func RunServer(ctx context.Context, ps *pubsub.PubSub, r io.Reader, w io.Writer,
 		}
 
 		time.Sleep(time.Second * 5)
-		ps.Pub(struct{}{}, "info.restart")
+		ps.Pub(struct{}{}, "server_restart")
 	}
 }
 
-func runBlocking(parentctx context.Context, ps *pubsub.PubSub, in io.Reader, out io.Writer) (err error) {
+func runBlocking(parentctx context.Context, restartKiller chan struct{}, in io.Reader, out io.Writer) (err error) {
 	ctx, cancel := context.WithCancel(parentctx)
 	defer cancel()
 
@@ -65,7 +70,7 @@ func runBlocking(parentctx context.Context, ps *pubsub.PubSub, in io.Reader, out
 	}()
 
 	go func() {
-		<-ps.SubOnce("restart")
+		<-restartKiller
 		zap.L().Info("internally triggered process restart")
 		cancel()
 	}()

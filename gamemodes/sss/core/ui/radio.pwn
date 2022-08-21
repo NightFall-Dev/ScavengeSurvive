@@ -36,8 +36,6 @@ static
 
 ShowRadioUI(playerid)
 {
-	ClosePlayerInventory(playerid, true);
-	
 	PlayerTextDrawShow(playerid, RadioUI_Main[playerid]);
 	PlayerTextDrawShow(playerid, RadioUI_Strip[playerid]);
 	PlayerTextDrawShow(playerid, RadioUI_KnobL[playerid]);
