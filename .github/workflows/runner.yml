@@ -1,6 +1,12 @@
 name: runner
 
-on: push
+on:
+  workflow_dispatch:
+  schedule:
+   # cronjob that triggers every day at 6PM UTC
+   - cron: '0 18 * * *'
+  push:
+    branches: ["main"]
 
 jobs:
   main:
