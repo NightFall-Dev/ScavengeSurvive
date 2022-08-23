@@ -42,6 +42,7 @@ jobs:
   build_amx:
     runs-on: ubuntu-latest
     name: Build amx
+    needs: [ build_runner ]
     outputs:
       full_sha: ${{ steps.var_a.outputs.full_sha }}
       short_sha: ${{ steps.var_a.outputs.short_sha }}
