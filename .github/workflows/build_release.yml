@@ -130,10 +130,15 @@ jobs:
             ```
             ${{ steps.runner_build_sha.outputs.runner_build_sha }}
             ```
+            To verify the build SHA256 during the action, click the build link, go-to "Create Release", open the Echo build sha256 step and read the sha256.
+
+            Compare this build hash with one that you generated yourself from the build artifacts.
+            Alternatively you can download the build artifacts, generate a SHA256 checksum and compare it with the below binary.
+            Build artifacts ARE NOT automatically the same as release assets since release assets can be modified afterwards.
 
             Full Commit Hash:
             ```
-            ${{ needs.build.outputs.full_sha }}
+            ${{ needs.build_runner.outputs.full_sha }}
             ```
           files: |
             ScavengeSurvive.amx
