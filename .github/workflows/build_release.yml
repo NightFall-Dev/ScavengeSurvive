@@ -121,9 +121,19 @@ jobs:
             **This release has been build by Github Actions**
             [Link to build](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-            Build SHA256:
+            Build amx SHA256:
             ```
-            ${{ steps.build_sha.outputs.build_sha }}
+            ${{ steps.amx_build_sha.outputs.amx_build_sha }}
+            ```
+
+            Build runner SHA256:
+            ```
+            ${{ steps.runner_build_sha.outputs.runner_build_sha }}
+            ```
+
+            Full Commit Hash:
+            ```
+            ${{ needs.build.outputs.full_sha }}
             ```
           files: |
             ScavengeSurvive.amx
