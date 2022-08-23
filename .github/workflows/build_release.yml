@@ -9,9 +9,12 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build_runner:
     runs-on: windows-latest
-    name: Build
+    name: Build runner
+    outputs:
+      full_sha: ${{ steps.var_r.outputs.full_sha }}
+      short_sha: ${{ steps.var_r.outputs.short_sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2.4.0
@@ -30,10 +33,24 @@ jobs:
             path: |
              ScavengeSurvive.exe
 
+      - name: Generate Build runner Info
+        id: var_r
+        run: |
+          echo "::set-output name=full_sha::$(git rev-parse HEAD)"
+          echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
+
+  build_amx:
+    runs-on: ubuntu-latest
+    name: Build amx
+    outputs:
+      full_sha: ${{ steps.var_a.outputs.full_sha }}
+      short_sha: ${{ steps.var_a.outputs.short_sha }}
+    needs: [ build ]
+    steps:
       - name: Setup sampctl & Build amx
         uses: AGraber/sampctl-action@v1
         with:
-          version: "1.9.1"
+          version: "1.10.0"
       - run: sampctl p build --forceEnsure
 
       - name: Upload compiled amx
@@ -41,3 +58,59 @@ jobs:
         with:
           name: compiled-amx
           path: gamemodes/ScavengeSurvive.amx
+
+      - name: Generate Build amx Info
+        id: var_a
+        run: |
+          echo "::set-output name=full_sha::$(git rev-parse HEAD)"
+          echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
+
+  create_release:
+    runs-on: ubuntu-latest
+    name: Create Release
+    needs: [ build_runner, build_amx ]
+    steps:
+      - name: Download compiled-amx
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: compiled-amx
+
+      - name: Echo build sha256 "amx"
+        id: amx_build_sha
+        run: |
+          sha256sum ScavengeSurvive.amx > sha256.checksum
+          echo "::set-output name=amx_build_sha::$(cat sha256.checksum)"
+          cat sha256.checksum
+
+      - name: Download compiled-runner
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: compiled-runner
+          
+      - name: Echo build sha256 "runner"
+        id: runner_build_sha
+        run: |
+          sha256sum ScavengeSurvive.exe > sha256.checksum
+          echo "::set-output name=runner_build_sha::$(cat sha256.checksum)"
+          cat sha256.checksum
+
+      - name: Remove previous build
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: 1769
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release [${{ needs.build.outputs.short_sha }}]
+          tag_name: 1769
+          body: |
+            **This release has been build by Github Actions**
+            [Link to build](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          files: |
+            ScavengeSurvive.amx
+            ScavengeSurvive.exe
