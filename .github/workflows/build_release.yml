@@ -115,12 +115,16 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release [${{ needs.build.outputs.short_sha }}]
+          name: Release [${{ needs.build_runner.outputs.short_sha }}]
           tag_name: 1769
           body: |
             **This release has been build by Github Actions**
             [Link to build](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
+            Build SHA256:
+            ```
+            ${{ steps.build_sha.outputs.build_sha }}
+            ```
           files: |
             ScavengeSurvive.amx
             ScavengeSurvive.exe
