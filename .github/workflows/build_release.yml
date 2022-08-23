@@ -34,13 +34,7 @@ jobs:
       - uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
-<<<<<<< HEAD
       - run: sampctl p build --forceEnsure
-=======
-
-      - name: SAMPCTL Build
-        run: sampctl p build --forceEnsure
->>>>>>> fbd3e0a8931e9d4cd723b5886475c6c1974318ae
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3
