@@ -17,7 +17,7 @@ jobs:
       short_sha: ${{ steps.var_r.outputs.short_sha }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -48,17 +48,22 @@ jobs:
       short_sha: ${{ steps.var_a.outputs.short_sha }}
     needs: [ build ]
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Setup sampctl & Build amx
         uses: AGraber/sampctl-action@v1
         with:
-          version: "1.10.0"
-      - run: sampctl p build --forceEnsure
+          version: "1.9.1"
+      - name: Setup sampctl & Build amx
+         run: |
+          sampctl p build --forceEnsure
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3
         with:
           name: compiled-amx
-          path: gamemodes/ScavengeSurvive.amx
+          path: |
+           gamemodes/ScavengeSurvive.amx
 
       - name: Generate Build amx Info
         id: var_a
