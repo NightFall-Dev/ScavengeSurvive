@@ -14,7 +14,9 @@ jobs:
     name: Build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2.4.0
+        with:
+          submodules: recursive
       - name: Setup Go environment
         uses: actions/setup-go@v3.2.1
         with:
@@ -37,4 +39,3 @@ jobs:
         with:
           name: compiled-amx
           path: gamemodes/ScavengeSurvive.amx
-      
