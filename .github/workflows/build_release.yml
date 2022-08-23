@@ -30,13 +30,11 @@ jobs:
             path: |
              ScavengeSurvive.exe
 
-      - name: Setup sampctl 
-        uses: AGraber/sampctl-action@v1
+      - name: Setup sampctl & Build amx
+      - uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
-
-      - name: SAMPCTL Build
-         run: sampctl p build --forceEnsure
+      - run: sampctl p build --forceEnsure
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3
