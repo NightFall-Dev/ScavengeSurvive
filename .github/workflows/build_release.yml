@@ -46,7 +46,6 @@ jobs:
     outputs:
       full_sha: ${{ steps.var_a.outputs.full_sha }}
       short_sha: ${{ steps.var_a.outputs.short_sha }}
-    needs: [ build ]
     steps:
       - name: Setup sampctl & Build amx
         uses: AGraber/sampctl-action@v1
