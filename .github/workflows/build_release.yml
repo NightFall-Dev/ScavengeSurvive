@@ -31,7 +31,7 @@ jobs:
              ScavengeSurvive.exe
 
       - name: Setup sampctl & Build amx
-      - uses: AGraber/sampctl-action@v1
+        uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
       - run: sampctl p build --forceEnsure
