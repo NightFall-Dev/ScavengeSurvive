@@ -25,7 +25,10 @@ jobs:
         uses: actions/setup-go@v3.2.1
         with:
           go-version: "^1.13.1"
-      - run: env GOOS=windows GOARCH=amd64 go build -o ScavengeSurvive.exe
+
+      - name: Build env
+        run: env GOOS=windows GOARCH=amd64 go build -o ScavengeSurvive.exe
+
       - name: Upload compiled runner
         uses: actions/upload-artifact@v3
         with:
@@ -49,12 +52,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup sampctl & Build amx
+
+      - name: Setup sampctl
         uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
-      - name: Setup sampctl & Build amx
-         run: |
+
+      - name: Build amx
+        run: |
           sampctl p build --forceEnsure
 
       - name: Upload compiled amx
