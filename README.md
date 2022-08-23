@@ -32,6 +32,7 @@ on your computer:
   application which will make the development process easier.
 - [Taskfile](https://taskfile.dev) To run common development tasks such as
   building, running and generating additional assets and data.
+- Microsoft Visual C++ 2013 Redistributable
 
 Tip: The easiest way to install all of these is with [Scoop](https://scoop.sh)!
 
