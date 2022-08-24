@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
 
   build_amx:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     name: Build amx
     needs: [ build_runner ]
     outputs:
@@ -69,8 +69,8 @@ jobs:
       - name: Build amx
       #sampctl p build --forceEnsure
         run: |
-          sampctl project ensure
-          sampctl project build
+          sampctl p ensure --platform windows
+          sampctl p build --platform windows --forceEnsure
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3.1.0
@@ -86,7 +86,7 @@ jobs:
           echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
 
   create_release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     name: Create Release
     needs: [ build_runner, build_amx ]
     steps:
