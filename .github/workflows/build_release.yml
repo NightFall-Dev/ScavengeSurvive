@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
 
   build_amx:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     name: Build amx
     needs: [ build_runner ]
     outputs:
@@ -86,7 +86,7 @@ jobs:
           echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
 
   create_release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     name: Create Release
     needs: [ build_runner, build_amx ]
     steps:
