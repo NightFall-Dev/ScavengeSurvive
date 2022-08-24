@@ -7,12 +7,12 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.0.0
       - uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
       - run: sampctl p build --forceEnsure
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3.1.0
         with:
           name: compiled-amx
           path: gamemodes/ScavengeSurvive.amx
