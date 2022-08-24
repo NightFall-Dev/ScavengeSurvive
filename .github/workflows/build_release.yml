@@ -55,14 +55,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3.0.0
 
+      - name: action-docker-compose
+        uses: sudo-bot/action-docker-compose@latest
+        with:
+          cli-args: |
+           docker-compose up -d
+
       - name: Setup sampctl
         uses: AGraber/sampctl-action@v1
         with:
           version: "1.9.1"
 
       - name: Build amx
+      #sampctl p build --forceEnsure
         run: |
-          sampctl p build --forceEnsure
+          sampctl project ensure
+          sampctl project build
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3.1.0
