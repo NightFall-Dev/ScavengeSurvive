@@ -59,7 +59,7 @@ jobs:
         uses: sudo-bot/action-docker-compose@latest
         with:
           cli-args: |
-           docker-compose up -d
+           up -d
 
       - name: Setup sampctl
         uses: AGraber/sampctl-action@v1
