@@ -67,10 +67,8 @@ jobs:
           version: "1.9.1"
 
       - name: Build amx
-      #sampctl p build --forceEnsure
         run: |
-          sampctl p ensure --platform windows
-          sampctl p build --platform windows --forceEnsure
+          sampctl p build --forceEnsure
 
       - name: Upload compiled amx
         uses: actions/upload-artifact@v3.1.0
