@@ -1,0 +1,318 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_runner:
+    runs-on: windows-latest
+    name: Build runner
+    outputs:
+      full_sha: ${{ steps.var_r.outputs.full_sha }}
+      short_sha: ${{ steps.var_r.outputs.short_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.5.0
+        with:
+          submodules: recursive
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.4.0
+        with:
+          #go-version: "^1.13.1"
+          go-version-file: 'go.mod'
+          #cache: true
+          #cache-dependency-path: path/go.sum
+
+      #- name: Run Task
+      #  run: task
+
+      - name: Build server
+        run: |
+          env GOOS=windows GOARCH=amd64 go build -o ScavengeSurvive.exe
+          env GOOS=linux GOARCH=amd64 go build -o ScavengeSurvive
+
+      - name: Create and Compress compiled runner
+        run: |
+         7z a -t7z ScavengeSurvive.win.7z -r *.* -x!*ScavengeSurvive -x!*.so -m0=lzma2 -mx9 -mmt
+         7z a -t7z ScavengeSurvive.linux.7z -r *.* -x!*.exe -x!*.dll -m0=lzma2 -mx9 -mmt
+
+      - name: Upload compiled runner
+        uses: actions/upload-artifact@v3.1.1
+        with:
+            name: compiled-runner
+            path: |
+             ScavengeSurvive.win.7z
+             ScavengeSurvive.linux.7z
+
+      - name: Generate Build runner Info
+        id: var_r
+        run: |
+          echo "full_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+  build_amx:
+    runs-on: ubuntu-latest
+    name: Build amx
+    needs: [ build_runner ]
+    outputs:
+      full_sha: ${{ steps.var_a.outputs.full_sha }}
+      short_sha: ${{ steps.var_a.outputs.short_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.5.0
+
+      - name: Run docker-compose
+        uses: sudo-bot/action-docker-compose@latest
+        with:
+          # https://docs.docker.com/compose/reference/overview/
+          # Command line arguments
+          cli-args: "up -d"
+
+      - name: Setup sampctl
+        uses: AGraber/sampctl-action@v1
+        with:
+          # default version "1.9.1"
+          # or curl https://raw.githubusercontent.com/Southclaws/sampctl/master/install-deb.sh | sh
+          version: "1.10.0"
+
+      - name: Build amx
+        run: |
+          sampctl p build --forceEnsure
+
+      - name: Create and Compress compiled amx
+        run: |
+          7z a -t7z -m0=lzma2 -mx9 -mmt "ScavengeSurvive.amx.7z" "gamemodes/ScavengeSurvive.amx"
+
+      - name: Upload compiled amx
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: compiled-amx
+          path: |
+           ScavengeSurvive.amx.7z
+
+      - name: Generate Build amx Info
+        id: var_a
+        run: |
+          echo "full_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT  
+
+  create_release:
+    runs-on: ubuntu-latest
+    name: Create Release
+    needs: [ build_runner, build_amx ]
+    steps:
+      - name: Download compiled-amx
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: compiled-amx
+
+      - name: Echo build sha256 "amx"
+        id: amx_build_sha
+        run: |
+          sha256sum ScavengeSurvive.amx.7z > sha256.checksum
+          echo "amx_build_sha=$(cat sha256.checksum)"
+          cat sha256.checksum
+
+      - name: Download compiled-runner
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: compiled-runner
+          
+      - name: Echo build sha256 "runner"
+        id: runner_build_sha
+        run: |
+          sha256sum ScavengeSurvive.win.7z > sha256.checksum
+          echo "runner_build_sha=$(cat sha256.checksum)"
+          cat sha256.checksum
+
+      - name: Remove previous build
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: 20.11
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v20.11 - Back from the Dead [${{ needs.build_runner.outputs.short_sha }}]
+          tag_name: 20.11
+          body: |
+            **This release has been build by Github Actions**
+            [Link to build](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            Yes. That's a new version scheme. That means this project has gone through three versioning schemes over the course of its lifetime.
+            This release marks the latest stable release of Scavenge and Survive.
+            
+            ## Does this mean SS is back?
+            
+            Kind of, almost, not quite, yes, but...
+            Most of what was actually stopping my from moving the project forward was the state of the codebase. In the recent weeks leading up to this release, most of that has been resolved. The project codebase has been updated to use the latest libraries and tooling in the community. This is great, because now anyone can easily build and run the project!
+            However, I don't intend to fully commit to "maintain" the project going forward, I lack the time.
+            
+            That being said, I do still want to be involved in some way. I can do pull request reviews etc. There's a new website at https://scavengesurvive.com/ with some documentation, there's a Discord server at: https://discord.gg/7y7mT4Q with a small community around it. There's a test/reference server that may or may not be permanent (so I won't link it here, just join the Discord and ask if it's online)
+            
+            ## What's New?
+            
+            Here's a very quick rundown of new features since the old days of the gamemode. A lot of this stuff was actually written years ago but was never released to the public or was simply not compiled into release builds back then.
+            
+            ### Features
+            #### Machines
+            Scrap Machine, Refine Machine and Water Purifier provide new avenues for base building, survival and item production.
+            
+            #### Three Types of Crafting
+            In-inventory crafting, construction crafting and workbench crafting! See docs for more.
+            
+            #### Plot Poles and Better Bases
+            Construct a Plot Pole and it will save items within a 20 metre radius. Place one of these in the middle of your base so you don't need to constantly place items in boxes! Place more around your base as you expand.
+            
+            Construct a Metal Frame and interact with it to add a roof. This lets you build bases on flat ground without the need for a game-world building to build inside! Or you can extend your base with more rooms.
+            
+            ### Deployment
+            There's a whole new deployment method and runner application that makes management of a server much easier. See the readme file for more information.
+            
+            ### Items
+            #### Notable Additions
+            Misc items that are interesting.
+            - Wood Log (WoodLog) - Now used to craft campfires
+            - Burnt Log (BurntLog) - the leftovers of when a campfire burns out
+            - Suitcase (Suitcase) - safebox, can save items inside
+            - Lock and Chain (WheelLock) - can be used to lock a bike
+            - Holdall (Holdall) - safebox, can save items inside
+            - Scrap Machine (ScrapMachine) - turn random metal items into scrap metal
+            - Refining Machine (RefineMachine) - turn scrap metal into refined metal
+            - Water Purifier (WaterMachine) - turn seawater into drinkable water
+            - Scrap Metal (ScrapMetal) - get this using a scrap machine, turn all those useless items into scrap!
+            - Refined Metal (RefinedMetal) - turn scrap into refined metal using a refining machine
+            - Plot Pole (PlotPole) - claim a plot of land for your clan! saves ALL items within 20 metres.
+            - Workbench (Workbench) - craft new items using a workbench
+            - Tool Box (ToolBox) - safebox, can save items inside
+            
+            #### Melee Weapons
+            - Sledgehammer (Sledgehammer) - melee weapon
+            - Big Ass Sword (BigSword) - melee weapon
+            - Kitchen Knife (Knife2) - melee weapon
+            - Fork (Fork)
+            - Knife (Knife3)
+            
+            #### Useless Items
+            Some of these items can be turned into scrap metal using a scrap machine.
+            Some of these items are just for crafting other items and don't actually do anything else.
+            Most of these were added because they may be neat for future features. If you want to implement these, go ahead! Submit a pull request!
+            
+            - Wrench (Spanner) - unused tool
+            - Oilcan (OilCan)
+            - Small Amp (RadioBox)
+            - Microphone (Microphone)
+            - Spatula (Spatula)
+            - Pan (Pan)
+            - Frying Pan (FryingPan)
+            - Ketchup (Ketchup)
+            - Mustard (Mustard)
+            - Briquettes (Briquettes)
+            - Cross (Cross)
+            - Boot (Boot)
+            - Doormat (Doormat)
+            - Control Box (ControlBox)
+            - Computer (Computer)
+            - IR Controller (RemoteControl)
+            - Red Panel (RedPanel)
+            - Broom (Broom)
+            - Keycard (Keycard)
+            - Padlock (Padlock)
+            - Oil Drum (OilDrum)
+            - Canister (Canister)
+            - Locator (Locator)
+            - Radio (Radio)
+            - Gear Box (GearBox)
+            - Metal Panel (MetalFrame)
+            - Electronic Lockpick (LockBreaker)
+            - Metal Frame (TallFrame)
+            
+            #### Food Items
+            - Fish (RawFish) - Can be fished from the ocean with a fishing rod
+            - Meat (Meat2) - food item, cook it
+            - Pizza (PizzaOnly)
+            - Loaf of Bread (BreadLoaf)
+            - Banana (Banana)
+            - Orange (Orange)
+            - Red Apple (RedApple)
+            - Lemon (Lemon)
+            - Pissh Box (PisschBox)
+            - Pizza Box (PizzaBox)
+            - Ice Cream (IceCream)
+            - Fishy Fingers (FishyFingers)
+            - Ice Cream Bars (IceCreamBars)
+            - Cereal (Cereal1)
+            - Cereal (Cereal2)
+            - Wrapped Meat (WrappedMeat)
+            - Wedding Cake (WeddingCake)
+            - Cake Slice (CakeSlice)
+            - Green Apple (GrnApple)
+            - Steak (Steak)
+            - Bread (Bread)
+            - Ham (Ham)
+            - Milk Bottle (MilkBottle)             - liquid container
+            - Milk Carton (MilkCarton)             - liquid container
+            - Apple Juice (AppleJuice)             - liquid container
+            - Orange Juice (OrangeJuice)             - liquid container
+            - Wine (Wine1)
+            - Wine (Wine2)
+            - Wine (Wine3)
+            - Whisky (Whisky)
+            - Champagne (Champagne)
+            
+            #### Hats/Masks/Apparel
+            - Beanie (Beanie)
+            - Straw Hat (StrawHat)
+            - Witches Hat (WitchesHat)
+            - Captain's Cap (CaptainsCap)
+            - Swat Helmet (SwatHelmet)
+            - Pizza Hat (PizzaHat)
+            - P#ssy Mask (P#ssyMask)
+            - Boxing Gloves (BoxingGloves)
+            - Devil Mask (DevilMask)
+            - Bandana (BandanaBl)
+            - Bandana (BandanaGr)
+            - Bandana (BandanaWh)
+            - Bandana (BandanaPat)
+            - Police Helmet (PoliceHelm)
+            
+            #### Furniture and Defence Items
+            - Locker (Locker)
+            - Desk (Desk)
+            - Table (Table)
+            - Gun Case (GunCase)
+            - Cupboard (Cupboard)
+            - Barstool (Barstool)
+            - Small Table (SmallTable)
+            - Large Frame (LargeFrame) - this can be fitted with a roof so you can build standalone buildings out of pure defences!
+            - Garage Door (GarageDoor) - unused, too big and may cause crashes
+
+
+            Build amx SHA256:
+            ```
+            ${{ steps.amx_build_sha.outputs.amx_build_sha }}
+            ```
+
+            Build runner SHA256:
+            ```
+            ${{ steps.runner_build_sha.outputs.runner_build_sha }}
+            ```
+            To verify the build SHA256 during the action, click the build link, go-to "Create Release", open the Echo build sha256 step and read the sha256.
+
+            Compare this build hash with one that you generated yourself from the build artifacts.
+            Alternatively you can download the build artifacts, generate a SHA256 checksum and compare it with the below binary.
+            Build artifacts ARE NOT automatically the same as release assets since release assets can be modified afterwards.
+
+            Full Commit Hash:
+            ```
+            ${{ needs.build_runner.outputs.full_sha }}
+            ```
+            
+          files: |
+            ScavengeSurvive.amx.7z
+            ScavengeSurvive.win.7z
+            ScavengeSurvive.linux.7z

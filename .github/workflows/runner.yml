@@ -1,0 +1,29 @@
+name: runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.5.0
+        with:
+          submodules: recursive
+      - name: Setup Go environment
+        uses: actions/setup-go@v3.3.0
+        with:
+          #go-version: "^1.13.1"
+          go-version-file: 'go.mod'
+          check-latest: true
+          #cache: true
+          #cache-dependency-path: path/go.sum
+      - run: env GOOS=linux GOARCH=amd64 go build -o ScavengeSurvive
+      - run: ./ScavengeSurvive
+      - run: 7z a -t7z -m0=lzma2 -mx=9 -mmt "ScavengeSurvive.linux.7z" "ScavengeSurvive" ".\plugins" ".\scriptfiles"
+      - uses: actions/upload-artifact@v3.1.1
+        with:
+          name: runner
+          path: |
+            ScavengeSurvive.linux.7z

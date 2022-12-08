@@ -1,0 +1,63 @@
+{
+	"user": "Southclaws",
+	"repo": "ScavengeSurvive",
+	"entry": "gamemodes/ScavengeSurvive.pwn",
+	"output": "gamemodes/ScavengeSurvive.amx",
+	"local": true,
+	"dependencies": [
+		"sampctl/samp-stdlib",
+		"sampctl/samp-stdutil",
+		"Southclaws/samp-nolog:0.2.1",
+		"Southclaws/samp-logger",
+		"Southclaws/pawn-errors",
+		"maddinat0r/sscanf:v2.8.3",
+		"samp-incognito/samp-streamer-plugin:v2.9.5",
+		"pawn-lang/YSI-Includes",
+		"Southclaws/formatex",
+		"oscar-broman/strlib",
+		"Southclaws/pawn-chrono:1.1.1",
+		"Southclaws/progress2",
+		"Southclaws/samp-ini",
+		"Southclaws/samp-whirlpool:v1.0.0",
+		"Zeex/samp-plugin-crashdetect:v4.20",
+		"oscar-broman/sqlitei",
+		"oscar-broman/md-sort",
+		"Southclaws/modio",
+		"ScavengeSurvive/personal-space",
+		"ScavengeSurvive/button",
+		"ScavengeSurvive/door",
+		"ScavengeSurvive/item",
+		"ScavengeSurvive/inventory",
+		"ScavengeSurvive/container",
+		"ScavengeSurvive/item-array-data",
+		"ScavengeSurvive/container-dialog",
+		"ScavengeSurvive/inventory-dialog",
+		"ScavengeSurvive/craft",
+		"Southclaws/pawn-fsutil:1.3.0",
+		"Southclaws/samp-weapon-data",
+		"Southclaws/samp-linegen",
+		"Southclaws/samp-zipline",
+		"Southclaws/samp-ladders"
+	],
+	"build": {
+		"args": [
+			"-;+",
+			"-(+",
+			"-\\+",
+			"-d3",
+			"-Z+"
+		],
+		"includes": [
+			"legacy"
+		]
+	},
+	"runtime": {
+		"bind": "0.0.0.0",
+		"port": 7777,
+		"rcon_password": "scavenge",
+		"hostname": "Southclaws' Scavenge and Survive",
+		"extra": {
+			"long_call_time": "0"
+		}
+	}
+}
